@@ -22,18 +22,13 @@ class Day4
       own = cards.split("|")[1].split(' ')
       lucky = winners & own
       # part 1 =====
-      point = 0
-      lucky.each_index do |ind|
-        point += ind == 0 ? 1 : point
-      end
-      points += point
+      lucky_size = lucky.size
+      points += 2 ** (lucky.size - 1) if lucky_size > 0
       # ------
       # Part 2 ===
-      deck[card_num].times do
-        for copy in (card_num + 1)..(card_num + lucky.length) do
-          break if copy == @puzzle.length
-          @deck[copy] += 1
-        end
+      for copy in (card_num + 1)..(card_num + lucky.length) do
+        break if copy == @puzzle.length
+        @deck[copy] += deck[card_num]
       end
     end
     puts "Total points: #{points}"
