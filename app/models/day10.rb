@@ -157,6 +157,10 @@ class Day10
 
     @puzzle.each_with_index do |line, row_index|
       line.chars.each_with_index do |col, col_index|
+        coord = "#{row_index},#{col_index}"
+        if @marked[coord]
+          next
+        end
         enclose += 1 if @polygon.contains?(Geometry::Point.new(row_index, col_index))
       end
     end
