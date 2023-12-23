@@ -1,7 +1,7 @@
 class Day10
   include Spliteable
 
-  attr_accessor :max, :visited
+  attr_accessor :max, :visited, :vertices
 
   # | going down to down OR up to Up
   # - going right to right, OR left to left
@@ -27,10 +27,12 @@ class Day10
   def self.go(test = false)
     day = Day10.new(test)
     day.farthest
+    day.enclosed
   end
 
   def farthest
     @max = 0
+    @vertices = []
     init_visited
     @marked = {}
     # find S first
@@ -40,6 +42,7 @@ class Day10
         @visited[index][found_s] = '0'
         coord = "#{index},#{found_s}"
         @marked[coord] = true
+        @vertices.push(Geometry::Vector.new(index, found_s))
 
         sr=pipe2(index, found_s + 1, 1, 'right') #right
         sl=pipe2(index, found_s - 1, 1, 'left') #left
@@ -60,7 +63,7 @@ class Day10
     line = @puzzle[row]
     return step - 1 if col < 0 || col >= line.length
     cell = line[col]
-    puts "Analyzing #{cell} at [#{row}][#{col}]"
+
     return step - 1 if cell == '.'
     return step if cell == 'S'
     coord = "#{row},#{col}"
@@ -104,16 +107,14 @@ class Day10
       end
 
       cell = line[col]
-      puts "Analyzing #{cell} at [#{row}][#{col}]"
+
       if cell == '.'
-        #step -= 1
         break
       end
       break if cell == 'S'
 
       coord = "#{row},#{col}"
       if @marked[coord]
-        #step -= 1
         break
       end
 
@@ -128,6 +129,9 @@ class Day10
 
       next_direction = pipe[direction]
       puts "I come from #{direction} and Next Direction is #{next_direction}"
+      if direction != next_direction
+        @vertices.push(Geometry::Vector.new(row, col))
+      end
 
       if next_direction == 'right'
         step += 1
@@ -145,6 +149,18 @@ class Day10
       direction = next_direction
     end
     step
+  end
+
+  def enclosed
+    enclose = 0
+    @polygon = Geometry::Polygon.new(@vertices)
+
+    @puzzle.each_with_index do |line, row_index|
+      line.chars.each_with_index do |col, col_index|
+        enclose += 1 if @polygon.contains?(Geometry::Point.new(row_index, col_index))
+      end
+    end
+    puts "Tile enclosed: #{enclose}"
   end
 
   private
